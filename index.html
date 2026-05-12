@@ -14,14 +14,8 @@
   }
   html { font-size: 15px; }
   body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; min-height:100vh; line-height:1.6; }
-  body::before {
-    content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
-    background-image:linear-gradient(rgba(240,192,64,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(240,192,64,0.03) 1px,transparent 1px);
-    background-size:40px 40px;
-  }
+  body::before { content:''; position:fixed; inset:0; pointer-events:none; z-index:0; background-image:linear-gradient(rgba(240,192,64,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(240,192,64,0.03) 1px,transparent 1px); background-size:40px 40px; }
   .app { position:relative; z-index:1; max-width:1200px; margin:0 auto; padding:0 24px 80px; }
-
-  /* HEADER */
   header { display:flex; align-items:center; justify-content:space-between; padding:28px 0 32px; border-bottom:1px solid var(--border); margin-bottom:40px; animation:fadeDown .5s ease both; }
   .logo { display:flex; align-items:center; gap:12px; }
   .logo-icon { width:38px; height:38px; border-radius:8px; background:var(--accent); display:flex; align-items:center; justify-content:center; font-family:'Syne',sans-serif; font-weight:800; font-size:18px; color:#0a0a0b; }
@@ -30,37 +24,23 @@
   .header-right { display:flex; align-items:center; gap:10px; }
   .au-flag { font-size:20px; }
   .header-badge { font-family:'DM Mono',monospace; font-size:11px; padding:4px 10px; border:1px solid var(--border2); border-radius:20px; color:var(--muted); }
-
-  /* LAYOUT */
   .section-title { font-family:'Syne',sans-serif; font-weight:600; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-bottom:16px; }
   .main-grid { display:grid; grid-template-columns:380px 1fr; gap:24px; align-items:start; animation:fadeUp .5s .1s ease both; }
-
-  /* PANELS */
   .panel { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
   .panel-header { padding:14px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
   .panel-title { font-family:'Syne',sans-serif; font-weight:600; font-size:14px; }
   .panel-body { padding:18px 20px; }
-
-  /* FORM */
   label { display:block; font-size:12px; font-weight:500; color:var(--muted); margin-bottom:6px; letter-spacing:.03em; }
   .field { margin-bottom:14px; }
   .field:last-child { margin-bottom:0; }
-  input[type=text], select {
-    width:100%; background:var(--bg3); border:1px solid var(--border);
-    border-radius:7px; color:var(--text); font-family:'DM Sans',sans-serif;
-    font-size:14px; padding:10px 14px; outline:none; transition:border-color .2s;
-  }
+  input[type=text], select { width:100%; background:var(--bg3); border:1px solid var(--border); border-radius:7px; color:var(--text); font-family:'DM Sans',sans-serif; font-size:14px; padding:10px 14px; outline:none; transition:border-color .2s; }
   input[type=text]:focus, select:focus { border-color:var(--accent); }
   select option { background:#18181d; }
   input::placeholder { color:var(--muted); font-size:13px; }
   .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-
-  /* QUICK LOCATION PILLS */
   .pill-row { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
   .pill { padding:4px 10px; background:var(--bg3); border:1px solid var(--border); border-radius:20px; font-size:12px; color:var(--muted); cursor:pointer; transition:all .15s; }
   .pill:hover { border-color:var(--accent); color:var(--accent); }
-
-  /* CHECKBOXES */
   .check-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
   .check-item { display:flex; align-items:center; gap:8px; padding:8px 10px; background:var(--bg3); border:1px solid var(--border); border-radius:7px; cursor:pointer; transition:border-color .15s; font-size:13px; user-select:none; }
   .check-item:hover { border-color:var(--border2); }
@@ -70,13 +50,9 @@
   .check-item input:checked ~ .check-box::after { content:'✓'; font-size:10px; color:#0a0a0b; font-weight:700; }
   .check-item input:checked ~ span { color:var(--text); }
   .check-item span { color:var(--muted); transition:color .15s; }
-
-  /* BUTTON */
   .btn-run { width:100%; padding:13px; background:var(--accent); color:#0a0a0b; font-family:'Syne',sans-serif; font-weight:700; font-size:14px; border:none; border-radius:8px; cursor:pointer; letter-spacing:.04em; transition:all .2s; display:flex; align-items:center; justify-content:center; gap:8px; margin-top:18px; }
   .btn-run:hover:not(:disabled) { background:var(--accent2); transform:translateY(-1px); }
   .btn-run:disabled { opacity:.4; cursor:not-allowed; }
-
-  /* STATS */
   .right-col { display:flex; flex-direction:column; gap:20px; }
   .stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
   .stat-card { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; }
@@ -85,8 +61,6 @@
   .stat-value.green { color:var(--green); }
   .stat-value.amber { color:var(--accent); }
   .stat-value.blue  { color:var(--blue); }
-
-  /* PROGRESS */
   .progress-section { display:none; }
   .progress-section.visible { display:block; }
   .progress-bar-wrap { height:6px; background:var(--bg3); border-radius:3px; overflow:hidden; margin-bottom:12px; }
@@ -96,8 +70,6 @@
   .log-line.green { color:var(--green); }
   .log-line.amber { color:var(--accent); }
   .log-line.red   { color:var(--red); }
-
-  /* RESULTS */
   .results-panel { display:none; }
   .results-panel.visible { display:block; }
   .toolbar { display:flex; align-items:center; gap:8px; padding:12px 16px; background:var(--bg3); border-bottom:1px solid var(--border); flex-wrap:wrap; }
@@ -118,38 +90,27 @@
   .tag { display:inline-block; font-size:11px; padding:2px 8px; border-radius:20px; font-family:'DM Mono',monospace; }
   .tag-cat { background:rgba(96,165,250,.1); color:var(--blue); }
   .tag-no  { color:var(--muted); }
-
   .pagination { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-top:1px solid var(--border); font-size:12px; color:var(--muted); }
   .page-btns { display:flex; gap:6px; }
   .page-btn { width:30px; height:30px; border-radius:6px; background:transparent; border:1px solid var(--border); color:var(--text); font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .15s; }
   .page-btn:hover, .page-btn.active { border-color:var(--accent); color:var(--accent); }
-
-  /* EMPTY */
   .empty-state { padding:60px 20px; text-align:center; color:var(--muted); }
   .empty-icon { font-size:36px; margin-bottom:14px; opacity:.25; }
   .empty-state p { font-size:14px; line-height:1.7; }
-
-  /* SPINNER */
   .spinner { width:14px; height:14px; border:2px solid rgba(10,10,11,.3); border-top-color:#0a0a0b; border-radius:50%; animation:spin .7s linear infinite; display:none; }
   .running .spinner { display:block; }
-
-  /* ERROR BANNER */
   .error-banner { background:rgba(248,113,113,.08); border:1px solid rgba(248,113,113,.25); border-radius:8px; padding:12px 16px; font-size:13px; color:var(--red); display:none; margin-top:12px; }
   .error-banner.visible { display:block; }
-
   @keyframes fadeDown { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:none} }
   @keyframes fadeUp   { from{opacity:0;transform:translateY(12px)}  to{opacity:1;transform:none} }
   @keyframes fadeIn   { from{opacity:0} to{opacity:1} }
   @keyframes spin     { to{transform:rotate(360deg)} }
-
   @media(max-width:960px) { .main-grid{grid-template-columns:1fr} .stats-row{grid-template-columns:repeat(2,1fr)} }
-  @media(max-width:500px) { .stats-row{grid-template-columns:1fr 1fr} header{flex-wrap:wrap; gap:12px} }
+  @media(max-width:500px) { .stats-row{grid-template-columns:1fr 1fr} header{flex-wrap:wrap;gap:12px} }
 </style>
 </head>
 <body>
 <div class="app">
-
-  <!-- HEADER -->
   <header>
     <div class="logo">
       <div class="logo-icon">LM</div>
@@ -162,8 +123,6 @@
   </header>
 
   <div class="main-grid">
-
-    <!-- ── LEFT: CONFIG ── -->
     <div>
       <p class="section-title">Search Configuration</p>
       <div class="panel">
@@ -172,12 +131,10 @@
           <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">yellowpages.com.au</span>
         </div>
         <div class="panel-body">
-
           <div class="field">
             <label>Business Type / Keyword</label>
             <input type="text" id="keyword" placeholder="e.g. fleet management, electrician, plumber" />
           </div>
-
           <div class="field">
             <label>State / Location</label>
             <select id="location">
@@ -208,7 +165,7 @@
               </optgroup>
               <option value="Australia">All Australia (National)</option>
             </select>
-            <div class="pill-row" id="quickLoc">
+            <div class="pill-row">
               <span class="pill" onclick="setLoc('Sydney NSW')">Sydney</span>
               <span class="pill" onclick="setLoc('Melbourne VIC')">Melbourne</span>
               <span class="pill" onclick="setLoc('Brisbane QLD')">Brisbane</span>
@@ -216,7 +173,6 @@
               <span class="pill" onclick="setLoc('Australia')">National</span>
             </div>
           </div>
-
           <div class="grid-2">
             <div class="field">
               <label>Pages to Scrape</label>
@@ -235,7 +191,6 @@
               </select>
             </div>
           </div>
-
         </div>
       </div>
 
@@ -259,34 +214,17 @@
         <div class="spinner" id="spinner"></div>
         <span id="runLabel">▶ Start Scraping</span>
       </button>
-
       <div class="error-banner" id="errorBanner"></div>
     </div>
 
-    <!-- ── RIGHT: OUTPUT ── -->
     <div class="right-col">
-
-      <!-- STATS -->
       <div class="stats-row">
-        <div class="stat-card">
-          <div class="stat-label">Total Leads</div>
-          <div class="stat-value green" id="stat-total">—</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">With Website</div>
-          <div class="stat-value amber" id="stat-web">—</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">With Phone</div>
-          <div class="stat-value blue" id="stat-phone">—</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Pages Done</div>
-          <div class="stat-value" id="stat-pages">—</div>
-        </div>
+        <div class="stat-card"><div class="stat-label">Total Leads</div><div class="stat-value green" id="stat-total">—</div></div>
+        <div class="stat-card"><div class="stat-label">With Website</div><div class="stat-value amber" id="stat-web">—</div></div>
+        <div class="stat-card"><div class="stat-label">With Phone</div><div class="stat-value blue" id="stat-phone">—</div></div>
+        <div class="stat-card"><div class="stat-label">Pages Done</div><div class="stat-value" id="stat-pages">—</div></div>
       </div>
 
-      <!-- PROGRESS -->
       <div class="panel progress-section" id="progressSection">
         <div class="panel-header">
           <span class="panel-title">Scraping Progress</span>
@@ -298,7 +236,6 @@
         </div>
       </div>
 
-      <!-- RESULTS TABLE -->
       <div class="panel results-panel" id="resultsPanel">
         <div class="panel-header">
           <span class="panel-title">Results</span>
@@ -310,10 +247,7 @@
           <button class="btn-export" onclick="exportJSON()">↓ Export JSON</button>
         </div>
         <div class="table-wrap">
-          <table>
-            <thead><tr id="tableHead"></tr></thead>
-            <tbody id="tableBody"></tbody>
-          </table>
+          <table><thead><tr id="tableHead"></tr></thead><tbody id="tableBody"></tbody></table>
         </div>
         <div class="pagination">
           <span id="pageInfo">—</span>
@@ -321,14 +255,12 @@
         </div>
       </div>
 
-      <!-- EMPTY STATE -->
       <div class="panel" id="emptyState">
         <div class="empty-state">
           <div class="empty-icon">🇦🇺</div>
           <p>Enter a keyword and location, then hit<br><strong>Start Scraping</strong> to collect Australian leads<br>from <span style="color:var(--accent)">yellowpages.com.au</span></p>
         </div>
       </div>
-
     </div>
   </div>
 </div>
@@ -336,22 +268,10 @@
 <script>
   let allLeads = [], filteredLeads = [], currentPage = 1;
   const PER_PAGE = 25;
+  const FIELD_MAP = { f_name:'name', f_phone:'phone', f_website:'website', f_address:'address', f_suburb:'suburb', f_category:'category', f_email:'email', f_yp_url:'yp_url' };
 
-  const FIELD_MAP = {
-    f_name:'name', f_phone:'phone', f_website:'website',
-    f_address:'address', f_suburb:'suburb', f_category:'category',
-    f_email:'email', f_yp_url:'yp_url'
-  };
-
-  function setLoc(val) {
-    document.getElementById('location').value = val;
-  }
-
-  function getFields() {
-    return Object.entries(FIELD_MAP)
-      .filter(([id]) => document.getElementById(id).checked)
-      .map(([,v]) => v);
-  }
+  function setLoc(val) { document.getElementById('location').value = val; }
+  function getFields() { return Object.entries(FIELD_MAP).filter(([id]) => document.getElementById(id).checked).map(([,v]) => v); }
 
   function addLog(msg, cls) {
     const log = document.getElementById('progressLog');
@@ -367,20 +287,12 @@
     document.getElementById('progressPct').textContent = Math.round(pct) + '%';
   }
 
-  function showError(msg) {
-    const el = document.getElementById('errorBanner');
-    el.textContent = '⚠ ' + msg;
-    el.classList.add('visible');
-  }
-
-  function hideError() {
-    document.getElementById('errorBanner').classList.remove('visible');
-  }
+  function showError(msg) { const el = document.getElementById('errorBanner'); el.textContent = '⚠ ' + msg; el.classList.add('visible'); }
+  function hideError() { document.getElementById('errorBanner').classList.remove('visible'); }
 
   async function startScrape() {
     const kw  = document.getElementById('keyword').value.trim();
     const loc = document.getElementById('location').value.trim();
-
     if (!kw)  { showError('Please enter a business type or keyword.'); return; }
     if (!loc) { showError('Please select a state or location.'); return; }
     hideError();
@@ -390,8 +302,6 @@
     if (!fields.length) { showError('Please select at least one data field.'); return; }
 
     allLeads = []; filteredLeads = []; currentPage = 1;
-
-    // UI reset
     document.getElementById('runBtn').disabled = true;
     document.getElementById('runBtn').classList.add('running');
     document.getElementById('runLabel').textContent = 'Scraping…';
@@ -425,15 +335,22 @@
 
       const data = await res.json();
       allLeads = data.leads || [];
-
       setProgress(100);
+
+      if (data.debug) {
+        console.group('LeadMiner Debug');
+        data.debug.forEach(d => console.log(d));
+        console.groupEnd();
+      }
 
       if (data.errors && data.errors.length) {
         data.errors.forEach(e => addLog('  ⚠ ' + e, 'red'));
       }
 
       if (allLeads.length === 0) {
-        addLog('  No leads found. Try a different keyword or location.', 'red');
+        addLog('  No leads found.', 'red');
+        addLog('  yellowpages.com.au may be blocking the request.', 'red');
+        addLog('  Check browser Console (F12) for debug details.', 'amber');
       } else {
         addLog(`✓  Done! ${allLeads.length} leads from ${data.pages} page(s).`, 'green');
       }
@@ -446,7 +363,7 @@
       renderTable();
       if (allLeads.length) document.getElementById('resultsPanel').classList.add('visible');
 
-    } catch (e) {
+    } catch(e) {
       setProgress(100);
       addLog('✗  Error: ' + e.message, 'red');
       addLog('   Check Netlify Functions logs for details.', '');
@@ -462,37 +379,30 @@
   function renderTable() {
     const q = (document.getElementById('tableSearch').value || '').toLowerCase();
     filteredLeads = allLeads.filter(l => Object.values(l).some(v => String(v).toLowerCase().includes(q)));
-
     const cols = allLeads.length ? Object.keys(allLeads[0]) : [];
-    document.getElementById('tableHead').innerHTML =
-      cols.map(c => `<th>${c}</th>`).join('') + '<th></th>';
-
+    document.getElementById('tableHead').innerHTML = cols.map(c => `<th>${c}</th>`).join('') + '<th></th>';
     const start = (currentPage - 1) * PER_PAGE;
     const slice = filteredLeads.slice(start, start + PER_PAGE);
-
     document.getElementById('tableBody').innerHTML = slice.map(lead => {
       const cells = cols.map(c => {
         const v = String(lead[c] || '');
         if (!v) return `<td><span class="tag-no">—</span></td>`;
-        if (c === 'Website') return `<td><a class="row-link" href="${v.startsWith('http')?v:'https://'+v}" target="_blank" rel="noopener noreferrer">${v.replace(/^https?:\/\//,'')}</a></td>`;
-        if (c === 'YP Listing URL') return `<td><a class="row-link" href="${v}" target="_blank" rel="noopener noreferrer">View ↗</a></td>`;
+        if (c === 'Website') return `<td><a class="row-link" href="${v.startsWith('http')?v:'https://'+v}" target="_blank" rel="noopener">${v.replace(/^https?:\/\//,'')}</a></td>`;
+        if (c === 'YP Listing URL') return `<td><a class="row-link" href="${v}" target="_blank" rel="noopener">View ↗</a></td>`;
         if (c === 'Category') return `<td><span class="tag tag-cat">${v}</span></td>`;
         return `<td title="${v}">${v}</td>`;
       }).join('');
       const safeLead = JSON.stringify(lead).replace(/'/g,"&apos;");
       return `<tr>${cells}<td><button class="btn-export" style="padding:3px 10px;font-size:11px" onclick='copyLead(this)' data-lead='${safeLead}'>Copy</button></td></tr>`;
     }).join('');
-
     const total = filteredLeads.length;
     const totalPages = Math.ceil(total / PER_PAGE);
     const s = total ? start + 1 : 0, e = Math.min(start + PER_PAGE, total);
     document.getElementById('pageInfo').textContent = `Showing ${s}–${e} of ${total} leads`;
     document.getElementById('resultCount').textContent = `${total} lead${total !== 1 ? 's' : ''}`;
-
     const pb = document.getElementById('pageBtns');
     pb.innerHTML = '';
-    const maxBtns = Math.min(totalPages, 8);
-    for (let i = 1; i <= maxBtns; i++) {
+    for (let i = 1; i <= Math.min(totalPages, 8); i++) {
       const b = document.createElement('button');
       b.className = 'page-btn' + (i === currentPage ? ' active' : '');
       b.textContent = i;
@@ -515,11 +425,8 @@
   function exportCSV() {
     if (!filteredLeads.length) return;
     const cols = Object.keys(filteredLeads[0]);
-    const bom  = '\uFEFF'; // UTF-8 BOM for Excel
-    const rows = [cols.join(','), ...filteredLeads.map(l =>
-      cols.map(c => `"${String(l[c]||'').replace(/"/g,'""')}"`).join(',')
-    )];
-    dl('leads_au.csv', bom + rows.join('\n'), 'text/csv;charset=utf-8');
+    const rows = [cols.join(','), ...filteredLeads.map(l => cols.map(c => `"${String(l[c]||'').replace(/"/g,'""')}"`).join(','))];
+    dl('leads_au.csv', '\uFEFF' + rows.join('\n'), 'text/csv;charset=utf-8');
   }
 
   function exportJSON() {
