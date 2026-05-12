@@ -1,0 +1,86 @@
+==============================================
+  LeadMiner — Netlify Deployment Guide
+==============================================
+
+YOUR FOLDER STRUCTURE (do not change this)
+─────────────────────────────────────────────
+leadminer/
+├── index.html                        ← Frontend UI
+├── netlify.toml                      ← Netlify config
+└── netlify/
+    └── functions/
+        ├── scrape.py                 ← Python scraper backend
+        └── requirements.txt          ← Python libraries
+
+
+STEP 1 — CREATE A NETLIFY ACCOUNT
+──────────────────────────────────
+1. Go to https://netlify.com
+2. Click "Sign up" → sign up with GitHub or email (free)
+
+
+STEP 2 — CREATE A GITHUB ACCOUNT (needed to deploy)
+─────────────────────────────────────────────────────
+1. Go to https://github.com
+2. Click "Sign up" → create a free account
+3. Click the "+" icon → "New repository"
+4. Name it: leadminer
+5. Set to Public, click "Create repository"
+6. Upload all files — drag the entire leadminer/ folder
+   contents into the GitHub page (keep the folder structure)
+7. Click "Commit changes"
+
+
+STEP 3 — DEPLOY TO NETLIFY
+────────────────────────────
+1. Go to https://app.netlify.com
+2. Click "Add new site" → "Import an existing project"
+3. Click "Deploy with GitHub"
+4. Select your "leadminer" repository
+5. Build settings (leave as default — netlify.toml handles it)
+6. Click "Deploy site"
+7. Wait ~2 minutes for first deploy
+
+Netlify will give you a URL like:
+   https://amazing-name-123456.netlify.app
+
+That's your live app! Share this link with anyone.
+
+
+STEP 4 — (OPTIONAL) CUSTOM DOMAIN
+────────────────────────────────────
+In Netlify → Site settings → Domain management
+→ Add custom domain (e.g. leadminer.yourdomain.com)
+
+
+UPDATING THE APP LATER
+────────────────────────
+Just edit files on GitHub → Netlify auto-redeploys in ~1 min.
+
+
+HOW IT WORKS
+─────────────
+1. User opens your Netlify URL in any browser
+2. They fill in keyword + location + click "Start Scraping"
+3. The browser calls your Netlify Function (scrape.py)
+4. The function scrapes Yellow Pages server-side (no CORS issues)
+5. Results come back as JSON → displayed in the table
+6. User can filter and export as CSV or JSON
+
+No Python installation needed on anyone's computer!
+
+
+TROUBLESHOOTING
+────────────────
+Problem : "Function not found" error
+Solution: Make sure netlify/functions/scrape.py exists in GitHub
+
+Problem : 0 leads returned
+Solution: Yellow Pages may have updated their layout.
+          Check Netlify function logs:
+          Netlify dashboard → Functions → scrape → View logs
+
+Problem : Deploy fails
+Solution: Check netlify.toml is in the root folder (same level as index.html)
+
+==============================================
