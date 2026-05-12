@@ -147,6 +147,21 @@ exports.handler = async function(event) {
   try { body = JSON.parse(event.body || "{}"); }
   catch { return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: "Invalid JSON" }) }; }
 
+  // DEBUG MODE - dump raw HTML
+  if (body.debug_html) {
+    const urls = buildURLs(body.keyword || "fleet", body.location || "Victoria", 1);
+    try {
+      const { status, body: html } = await fetchURL(urls[0]);
+      return {
+        statusCode: 200,
+        headers: { ...CORS, "Content-Type": "text/plain" },
+        body: `STATUS: ${status}\nLENGTH: ${html.length}\n\n${html.substring(0, 8000)}`,
+      };
+    } catch(e) {
+      return { statusCode: 200, headers: CORS, body: JSON.stringify({ error: e.message }) };
+    }
+  }
+
   const keyword  = (body.keyword  || "").trim();
   const location = (body.location || "").trim();
   const pages    = Math.min(parseInt(body.pages) || 1, 10);
