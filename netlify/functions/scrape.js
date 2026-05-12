@@ -18,11 +18,9 @@ const USER_AGENTS = [
 function randUA() { return USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]; }
 
 function buildURLs(keyword, location, page) {
-  const slug = k => k.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
   return [
     `https://www.yellowpages.com.au/search/listings?clue=${encodeURIComponent(keyword)}&locationClue=${encodeURIComponent(location)}&pageNumber=${page}`,
-    `https://www.yellowpages.com.au/find/${slug(keyword)}/${slug(location)}?pageNumber=${page}`,
-    `https://www.yellowpages.com.au/search/listings?clue=${encodeURIComponent(keyword)}&locationClue=${encodeURIComponent(location)}&page=${page}`,
+    `https://www.yellowpages.com.au/search/listings?clue=${encodeURIComponent(keyword)}&locationClue=${encodeURIComponent(location)}&pageNumber=${page}&rfng=l`,
   ];
 }
 
