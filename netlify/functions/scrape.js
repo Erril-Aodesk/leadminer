@@ -1,6 +1,7 @@
 const https = require("https");
 const zlib  = require("zlib");
 
+const SCRAPER_API_KEY = "10279441c836827d7d7f54df05fff32d";
 const CORS = {
   "Access-Control-Allow-Origin":  "*",
   "Access-Control-Allow-Headers": "Content-Type",
@@ -8,84 +9,51 @@ const CORS = {
   "Content-Type": "application/json",
 };
 
-const USER_AGENTS = [
-  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-  "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0",
-  "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-];
-
-function randUA() { return USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]; }
-
-function buildURLs(keyword, location, page) {
-  return [
-    `https://www.yellowpages.com.au/search/listings?clue=${encodeURIComponent(keyword)}&locationClue=${encodeURIComponent(location)}&pageNumber=${page}`,
-    `https://www.yellowpages.com.au/search/listings?clue=${encodeURIComponent(keyword)}&locationClue=${encodeURIComponent(location)}&pageNumber=${page}&rfng=l`,
-  ];
-}
-
-function fetchURL(url, attempt = 0) {
+function fetchViaScraperAPI(targetUrl, attempt = 0) {
   return new Promise((resolve, reject) => {
-    const options = {
-      headers: {
-        "User-Agent": randUA(),
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-        "Accept-Language": "en-AU,en;q=0.9",
-        "Accept-Encoding": "gzip, deflate, br",
-        "Referer": "https://www.yellowpages.com.au/",
-        "Cache-Control": "no-cache",
-        "Sec-Fetch-Dest": "document",
-        "Sec-Fetch-Mode": "navigate",
-        "Sec-Fetch-Site": "same-origin",
-        "Upgrade-Insecure-Requests": "1",
-      },
-      timeout: 25000,
-    };
-
-    const req = https.get(url, options, res => {
+    const apiUrl = `https://api.scraperapi.com?api_key=${SCRAPER_API_KEY}&url=${encodeURIComponent(targetUrl)}&country_code=au&render=false`;
+    const req = https.get(apiUrl, { timeout: 30000 }, res => {
       if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-        const loc = res.headers.location.startsWith("http")
-          ? res.headers.location
-          : "https://www.yellowpages.com.au" + res.headers.location;
-        return resolve(fetchURL(loc, attempt));
+        return resolve(fetchViaScraperAPI(res.headers.location, attempt));
       }
-      if ([403, 429, 503].includes(res.statusCode) && attempt < 3) {
-        return setTimeout(() => resolve(fetchURL(url, attempt + 1)), (attempt + 1) * 4000);
+      if ([429, 503].includes(res.statusCode) && attempt < 3) {
+        return setTimeout(() => resolve(fetchViaScraperAPI(targetUrl, attempt + 1)), (attempt + 1) * 4000);
       }
-
       const chunks = [];
       let stream = res;
       const enc = (res.headers["content-encoding"] || "").toLowerCase();
-      if (enc === "gzip")    stream = res.pipe(zlib.createGunzip());
-      else if (enc === "br") stream = res.pipe(zlib.createBrotliDecompress());
+      if (enc === "gzip")         stream = res.pipe(zlib.createGunzip());
+      else if (enc === "br")      stream = res.pipe(zlib.createBrotliDecompress());
       else if (enc === "deflate") stream = res.pipe(zlib.createInflate());
-
       stream.on("data", c => chunks.push(c));
       stream.on("end", () => resolve({ status: res.statusCode, body: Buffer.concat(chunks).toString("utf8") }));
       stream.on("error", reject);
     });
     req.on("error", err => {
-      if (attempt < 2) setTimeout(() => resolve(fetchURL(url, attempt + 1)), 2000);
+      if (attempt < 2) setTimeout(() => resolve(fetchViaScraperAPI(targetUrl, attempt + 1)), 2000);
       else reject(err);
     });
-    req.on("timeout", () => { req.destroy(); reject(new Error("Timeout")); });
+    req.on("timeout", () => { req.destroy(); reject(new Error("Request timed out")); });
   });
+}
+
+function buildURL(keyword, location, page) {
+  return `https://www.yellowpages.com.au/search/listings?clue=${encodeURIComponent(keyword)}&locationClue=${encodeURIComponent(location)}&pageNumber=${page}`;
 }
 
 function parseListings(html, fields) {
   const leads = [];
-  const strip = s => s.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+  const strip  = s => s.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
   const decode = s => s.replace(/&amp;/g,"&").replace(/&#39;/g,"'").replace(/&quot;/g,'"').replace(/&lt;/g,"<").replace(/&gt;/g,">");
 
-  let sections = html.split(/(?=<(?:div|li|article)[^>]+(?:data-listing-id|class="[^"]*(?:listing-result|organic|natural)[^"]*")[^>]*>)/i);
+  let sections = html.split(/(?=<div[^>]+class="[^"]*(?:listing-result|organic|natural|search-result)[^"]*")/i);
   if (sections.length < 3) {
-    sections = html.split(/(?=<div[^>]+class="[^"]*listing[^"]*"[^>]*>)/i);
+    sections = html.split(/(?=<div[^>]+class="[^"]*result[^"]*"[^>]*>)/i);
   }
 
   for (const sec of sections) {
-    if (sec.length < 80) continue;
+    if (sec.length < 100) continue;
     if (!sec.match(/listing-name|business-name|tel:|listing-contact/i)) continue;
-
     const lead = {};
 
     if (fields.includes("name")) {
@@ -94,23 +62,26 @@ function parseListings(html, fields) {
       lead["Business Name"] = m ? decode(m[1].trim()) : "";
     }
     if (fields.includes("phone")) {
-      const m = sec.match(/href="tel:([^"]+)"/i);
-      lead["Phone"] = m ? m[1].replace("tel:","").trim() : "";
+      const m = sec.match(/href="tel:([^"]+)"/i)
+             || sec.match(/class="[^"]*(?:phone|contact-number|listing-phone)[^"]*"[^>]*>\s*([0-9()\s\-+]{7,20})/i);
+      lead["Phone"] = m ? decode(m[1].replace("tel:","").trim()) : "";
     }
     if (fields.includes("website")) {
-      const m = sec.match(/href="(https?:\/\/(?!(?:www\.)?yellowpages\.com\.au)[^"]{5,})"[^>]*(?:class="[^"]*(?:website|visit|external)[^"]*"|data-[a-z]+=["'][^"']*website[^"']*["'])/i);
+      const m = sec.match(/href="(https?:\/\/(?!(?:www\.)?yellowpages\.com\.au)[^"]{5,})"[^>]*(?:class="[^"]*(?:website|visit|external|track-visit)[^"]*"|data-[a-z]+=["'][^"']*website[^"']*["'])/i)
+             || sec.match(/(?:class="[^"]*(?:website|visit-website)[^"]*")[^>]*href="(https?:\/\/[^"]+)"/i);
       lead["Website"] = m ? m[1].trim() : "";
     }
     if (fields.includes("address")) {
-      const m = sec.match(/class="[^"]*(?:listing-address|address)[^"]*"[^>]*>([\s\S]{3,300}?)<\/(?:p|div|span)/i);
+      const m = sec.match(/class="[^"]*(?:listing-address|address|street-address)[^"]*"[^>]*>([\s\S]{3,300}?)<\/(?:p|div|span|address)>/i)
+             || sec.match(/itemprop="streetAddress"[^>]*>([^<]{3,100})</i);
       lead["Address"] = m ? decode(strip(m[1])) : "";
     }
     if (fields.includes("suburb")) {
       const m = sec.match(/\b([A-Z][a-zA-Z '\-]{1,30}),?\s+(NSW|VIC|QLD|WA|SA|TAS|ACT|NT)\b(?:\s+(\d{4}))?/);
-      lead["Suburb/State"] = m ? `${m[1].trim()}, ${m[2]}${m[3] ? " " + m[3] : ""}` : "";
+      lead["Suburb/State"] = m ? `${m[1].trim()}, ${m[2]}${m[3] ? " "+m[3] : ""}` : "";
     }
     if (fields.includes("category")) {
-      const m = sec.match(/class="[^"]*categor[^"]*"[^>]*>\s*(?:<[^>]+>\s*)*([^<]{2,80})/i);
+      const m = sec.match(/class="[^"]*(?:categor|business-type|listing-category)[^"]*"[^>]*>\s*(?:<[^>]+>\s*)*([^<]{2,80})/i);
       lead["Category"] = m ? decode(m[1].trim()) : "";
     }
     if (fields.includes("email")) {
@@ -118,9 +89,9 @@ function parseListings(html, fields) {
       lead["Email"] = m ? m[1].trim() : "";
     }
     if (fields.includes("yp_url")) {
-      const m = sec.match(/href="(\/[a-z][^"?#]{10,}\/[^"?#]{3,}(?:\.htm)?)"[^>]*class="[^"]*listing-name/i)
+      const m = sec.match(/href="(\/[a-zA-Z0-9][^"?#]{10,})"\s*[^>]*class="[^"]*listing-name/i)
              || sec.match(/class="[^"]*listing-name[^"]*"[^>]*href="(\/[^"?#]{10,})"/i);
-      lead["YP Listing URL"] = m ? "https://www.yellowpages.com.au" + m[1] : "";
+      lead["YP Listing URL"] = m ? "https://www.yellowpages.com.au"+m[1] : "";
     }
 
     if (lead["Business Name"] && lead["Business Name"].length > 1) leads.push(lead);
@@ -128,7 +99,7 @@ function parseListings(html, fields) {
 
   const seen = new Set();
   return leads.filter(l => {
-    const k = (l["Business Name"] || "").toLowerCase().trim();
+    const k = (l["Business Name"]||"").toLowerCase().trim();
     if (!k || seen.has(k)) return false;
     seen.add(k); return true;
   });
@@ -140,25 +111,9 @@ exports.handler = async function(event) {
   if (event.httpMethod === "OPTIONS") {
     return { statusCode: 200, headers: CORS, body: "" };
   }
-
   let body;
   try { body = JSON.parse(event.body || "{}"); }
   catch { return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: "Invalid JSON" }) }; }
-
-  // DEBUG MODE - dump raw HTML
-  if (body.debug_html) {
-    const urls = buildURLs(body.keyword || "fleet", body.location || "Victoria", 1);
-    try {
-      const { status, body: html } = await fetchURL(urls[0]);
-      return {
-        statusCode: 200,
-        headers: { ...CORS, "Content-Type": "text/plain" },
-        body: `STATUS: ${status}\nLENGTH: ${html.length}\n\n${html.substring(0, 8000)}`,
-      };
-    } catch(e) {
-      return { statusCode: 200, headers: CORS, body: JSON.stringify({ error: e.message }) };
-    }
-  }
 
   const keyword  = (body.keyword  || "").trim();
   const location = (body.location || "").trim();
@@ -172,35 +127,29 @@ exports.handler = async function(event) {
   const allLeads = [], errors = [], debugInfo = [];
 
   for (let page = 1; page <= pages; page++) {
-    const urls = buildURLs(keyword, location, page);
-    let success = false;
-
-    for (const url of urls) {
-      try {
-        const { status, body: html } = await fetchURL(url);
-        debugInfo.push(`Page ${page}: ${url} → HTTP ${status} (${html.length} bytes)`);
-
-        if (status === 200 && html.length > 1000) {
-          const leads = parseListings(html, fields);
-          allLeads.push(...leads);
-          debugInfo.push(`Page ${page}: parsed ${leads.length} leads`);
-          success = true;
-          break;
-        } else {
-          debugInfo.push(`Page ${page}: got status ${status}, trying next URL`);
-        }
-      } catch(e) {
-        debugInfo.push(`Page ${page}: ${url} → Error: ${e.message}`);
+    const url = buildURL(keyword, location, page);
+    debugInfo.push(`Page ${page}: fetching via ScraperAPI → ${url}`);
+    try {
+      const { status, body: html } = await fetchViaScraperAPI(url);
+      debugInfo.push(`Page ${page}: HTTP ${status}, ${html.length} bytes`);
+      if (status === 200 && html.length > 1000) {
+        const leads = parseListings(html, fields);
+        allLeads.push(...leads);
+        debugInfo.push(`Page ${page}: parsed ${leads.length} leads`);
+      } else {
+        errors.push(`Page ${page}: unexpected status ${status}`);
+        debugInfo.push(`Page ${page}: preview → ${html.substring(0,300)}`);
       }
+    } catch(e) {
+      errors.push(`Page ${page}: ${e.message}`);
+      debugInfo.push(`Page ${page}: error → ${e.message}`);
     }
-
-    if (!success) errors.push(`Page ${page}: could not fetch results (YP AU may be blocking)`);
-    if (page < pages) await sleep(3000 + Math.random() * 2000);
+    if (page < pages) await sleep(1500 + Math.random() * 1000);
   }
 
   const seen = new Set();
   const uniqueLeads = allLeads.filter(l => {
-    const k = (l["Business Name"] || "").toLowerCase().trim();
+    const k = (l["Business Name"]||"").toLowerCase().trim();
     if (!k || seen.has(k)) return false;
     seen.add(k); return true;
   });
