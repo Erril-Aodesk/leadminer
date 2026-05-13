@@ -129,7 +129,7 @@ const server = http.createServer(async (req, res) => {
         const url = `https://www.yellowpages.com.au/search/listings?clue=${encodeURIComponent(body.keyword)}&locationClue=${encodeURIComponent(body.location)}&pageNumber=1`;
         const { status, body: html } = await fetchViaZenRows(url);
         res.writeHead(200, { "Content-Type": "text/plain" });
-        res.end(`STATUS: ${status}\nLENGTH: ${html.length}\n\n${html.substring(0, 15000)}`);
+        res.end(`STATUS: ${status}\nLENGTH: ${html.length}\n\n${html.substring(0, 30000)}`);
       } catch(e) {
         res.writeHead(500, { "Content-Type": "application/json" });
         res.end(JSON.stringify({ error: e.message }));
@@ -163,7 +163,7 @@ const server = http.createServer(async (req, res) => {
     const allLeads = [], errors = [], debugInfo = [];
 
     for (let page = 1; page <= pages; page++) {
-      const url = `https://www.yellowpages.com.au/search/listings?clue=${encodeURIComponent(keyword)}&locationClue=${encodeURIComponent(location)}&pageNumber=${page}`;
+      const url = `https://www.yellowpages.com.au/search/listings?clue=${encodeURIComponent(keyword)}&locationClue=${encodeURIComponent(location)}&pageNumber=${page}&clueType=category`;
       debugInfo.push(`Page ${page}: fetching → ${url}`);
       try {
         const { status, body: html } = await fetchViaZenRows(url);
