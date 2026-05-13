@@ -133,7 +133,8 @@ const server = http.createServer(async (req, res) => {
         const url = `https://www.yellowpages.com.au/search/listings?clue=${encodeURIComponent(body.keyword)}&locationClue=${encodeURIComponent(body.location)}&pageNumber=1`;
         const { status, body: html } = await fetchViaZenRows(url);
         res.writeHead(200, { "Content-Type": "text/plain" });
-        res.end(`STATUS: ${status}\nURL: ${url}\nLENGTH: ${html.length}\n\n${html.substring(0, 30000)}`);
+        const mid = Math.floor(html.length / 2);
+res.end(`STATUS: ${status}\nURL: ${url}\nLENGTH: ${html.length}\n\nSECTION 1 (0-30000):\n${html.substring(0, 30000)}\n\nSECTION 2 (mid):\n${html.substring(mid, mid + 30000)}`);
       } catch(e) {
         res.writeHead(500, { "Content-Type": "application/json" });
         res.end(JSON.stringify({ error: e.message }));
