@@ -4,6 +4,7 @@ const http  = require("http");
 
 const ZENROWS_API_KEY = "780567355fbfcda661e405bd0a3a0b249c59c1a2";
 const PORT = process.env.PORT || 3000;
+const slug = (s) => s.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
 
 function fetchViaZenRows(targetUrl, attempt = 0) {
   return new Promise((resolve, reject) => {
@@ -13,6 +14,7 @@ function fetchViaZenRows(targetUrl, attempt = 0) {
       antibot: "true",
       premium_proxy: "true",
       proxy_country: "au",
+      js_render: "true",
     });
     const apiUrl = `https://api.zenrows.com/v1/?${params.toString()}`;
     const req = https.get(apiUrl, { timeout: 55000 }, res => {
@@ -110,13 +112,13 @@ function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 const server = http.createServer(async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
 
   if (req.method === "OPTIONS") { res.writeHead(200); res.end(); return; }
 
   if (req.method === "GET" && req.url === "/ping") {
     res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ status: "ok", version: "3.0" }));
+    res.end(JSON.stringify({ status: "ok", version: "3.1" }));
     return;
   }
 
@@ -126,10 +128,10 @@ const server = http.createServer(async (req, res) => {
     req.on("end", async () => {
       try {
         const body = JSON.parse(rawBody);
-        const url = `https://www.yellowpages.com.au/search/listings?clue=${encodeURIComponent(body.keyword)}&locationClue=${encodeURIComponent(body.location)}&pageNumber=1`;
+        const url = `https://www.yellowpages.com.au/${slug(body.location)}/${slug(body.keyword)}?pageNumber=1`;
         const { status, body: html } = await fetchViaZenRows(url);
         res.writeHead(200, { "Content-Type": "text/plain" });
-        res.end(`STATUS: ${status}\nLENGTH: ${html.length}\n\n${html.substring(0, 30000)}`);
+        res.end(`STATUS: ${status}\nURL: ${url}\nLENGTH: ${html.length}\n\n${html.substring(0, 30000)}`);
       } catch(e) {
         res.writeHead(500, { "Content-Type": "application/json" });
         res.end(JSON.stringify({ error: e.message }));
@@ -163,7 +165,7 @@ const server = http.createServer(async (req, res) => {
     const allLeads = [], errors = [], debugInfo = [];
 
     for (let page = 1; page <= pages; page++) {
-      const url = `https://www.yellowpages.com.au/search/listings?clue=${encodeURIComponent(keyword)}&locationClue=${encodeURIComponent(location)}&pageNumber=${page}&clueType=category`;
+      const url = `https://www.yellowpages.com.au/${slug(location)}/${slug(keyword)}?pageNumber=${page}`;
       debugInfo.push(`Page ${page}: fetching → ${url}`);
       try {
         const { status, body: html } = await fetchViaZenRows(url);
@@ -174,9 +176,11 @@ const server = http.createServer(async (req, res) => {
           debugInfo.push(`Page ${page}: parsed ${leads.length} leads`);
         } else {
           errors.push(`Page ${page}: status ${status}`);
+          debugInfo.push(`Page ${page}: preview → ${html.substring(0,300)}`);
         }
       } catch(e) {
         errors.push(`Page ${page}: ${e.message}`);
+        debugInfo.push(`Page ${page}: error → ${e.message}`);
       }
       if (page < pages) await sleep(1500 + Math.random() * 1000);
     }
