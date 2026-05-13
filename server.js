@@ -113,6 +113,31 @@ const server = http.createServer(async (req, res) => {
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
 
   if (req.method === "OPTIONS") { res.writeHead(200); res.end(); return; }
+
+  if (req.method === "GET" && req.url === "/ping") {
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ status: "ok", version: "3.0" }));
+    return;
+  }
+
+  if (req.method === "POST" && req.url === "/html-dump") {
+    let rawBody = "";
+    req.on("data", c => rawBody += c);
+    req.on("end", async () => {
+      try {
+        const body = JSON.parse(rawBody);
+        const url = `https://www.yellowpages.com.au/search/listings?clue=${encodeURIComponent(body.keyword)}&locationClue=${encodeURIComponent(body.location)}&pageNumber=1`;
+        const { status, body: html } = await fetchViaZenRows(url);
+        res.writeHead(200, { "Content-Type": "text/plain" });
+        res.end(`STATUS: ${status}\nLENGTH: ${html.length}\n\n${html.substring(0, 15000)}`);
+      } catch(e) {
+        res.writeHead(500, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: e.message }));
+      }
+    });
+    return;
+  }
+
   if (req.method !== "POST" || req.url !== "/scrape") {
     res.writeHead(404); res.end(JSON.stringify({ error: "Not found" })); return;
   }
