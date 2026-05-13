@@ -15,6 +15,8 @@ function fetchViaZenRows(targetUrl, attempt = 0) {
       premium_proxy: "true",
       proxy_country: "au",
       js_render: "true",
+      wait: "3000",
+      session_id: Math.floor(Math.random() * 9999999),
     });
     const apiUrl = `https://api.zenrows.com/v1/?${params.toString()}`;
     const req = https.get(apiUrl, { timeout: 55000 }, res => {
@@ -118,7 +120,7 @@ const server = http.createServer(async (req, res) => {
 
   if (req.method === "GET" && req.url === "/ping") {
     res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ status: "ok", version: "3.1" }));
+    res.end(JSON.stringify({ status: "ok", version: "3.2" }));
     return;
   }
 
@@ -128,7 +130,7 @@ const server = http.createServer(async (req, res) => {
     req.on("end", async () => {
       try {
         const body = JSON.parse(rawBody);
-        const url = `https://www.yellowpages.com.au/${slug(body.location)}/${slug(body.keyword)}?pageNumber=1`;
+        const url = `https://www.yellowpages.com.au/search/listings?clue=${encodeURIComponent(body.keyword)}&locationClue=${encodeURIComponent(body.location)}&pageNumber=1`;
         const { status, body: html } = await fetchViaZenRows(url);
         res.writeHead(200, { "Content-Type": "text/plain" });
         res.end(`STATUS: ${status}\nURL: ${url}\nLENGTH: ${html.length}\n\n${html.substring(0, 30000)}`);
@@ -165,7 +167,7 @@ const server = http.createServer(async (req, res) => {
     const allLeads = [], errors = [], debugInfo = [];
 
     for (let page = 1; page <= pages; page++) {
-      const url = `https://www.yellowpages.com.au/${slug(location)}/${slug(keyword)}?pageNumber=${page}`;
+      const url = `https://www.yellowpages.com.au/search/listings?clue=${encodeURIComponent(keyword)}&locationClue=${encodeURIComponent(location)}&pageNumber=${page}`;
       debugInfo.push(`Page ${page}: fetching → ${url}`);
       try {
         const { status, body: html } = await fetchViaZenRows(url);
