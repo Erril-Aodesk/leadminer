@@ -118,7 +118,7 @@
     </div>
     <div class="header-right">
       <span class="au-flag">🇦🇺</span>
-      <div class="header-badge">yellowpages.com.au · v2.3</div>
+      <div class="header-badge">yellowpages.com.au · v3.0</div>
     </div>
   </header>
 
@@ -133,7 +133,7 @@
         <div class="panel-body">
           <div class="field">
             <label>Business Type / Keyword</label>
-            <input type="text" id="keyword" placeholder="e.g. fleet management, electrician, plumber" />
+            <input type="text" id="keyword" placeholder="e.g. accountant, electrician, plumber" />
           </div>
           <div class="field">
             <label>State / Location</label>
@@ -266,9 +266,15 @@
 </div>
 
 <script>
+  const API_URL = "https://leadminer-production.up.railway.app/scrape";
+
   let allLeads = [], filteredLeads = [], currentPage = 1;
   const PER_PAGE = 25;
-  const FIELD_MAP = { f_name:'name', f_phone:'phone', f_website:'website', f_address:'address', f_suburb:'suburb', f_category:'category', f_email:'email', f_yp_url:'yp_url' };
+  const FIELD_MAP = {
+    f_name:'name', f_phone:'phone', f_website:'website',
+    f_address:'address', f_suburb:'suburb', f_category:'category',
+    f_email:'email', f_yp_url:'yp_url'
+  };
 
   function setLoc(val) { document.getElementById('location').value = val; }
   function getFields() { return Object.entries(FIELD_MAP).filter(([id]) => document.getElementById(id).checked).map(([,v]) => v); }
@@ -314,11 +320,11 @@
     setProgress(5);
     addLog(`▶  Searching: "${kw}" in "${loc}"`, 'amber');
     addLog(`   Fields: ${fields.join(', ')}`, '');
-    addLog('   Connecting to yellowpages.com.au…', '');
+    addLog('   Connecting to yellowpages.com.au via Railway…', '');
 
     try {
       setProgress(15);
-      const res = await fetch('/.netlify/functions/scrape', {
+      const res = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ keyword: kw, location: loc, pages, fields }),
@@ -348,9 +354,7 @@
       }
 
       if (allLeads.length === 0) {
-        addLog('  No leads found.', 'red');
-        addLog('  yellowpages.com.au may be blocking the request.', 'red');
-        addLog('  Check browser Console (F12) for debug details.', 'amber');
+        addLog('  No leads found. Try a shorter keyword.', 'red');
       } else {
         addLog(`✓  Done! ${allLeads.length} leads from ${data.pages} page(s).`, 'green');
       }
@@ -366,7 +370,6 @@
     } catch(e) {
       setProgress(100);
       addLog('✗  Error: ' + e.message, 'red');
-      addLog('   Check Netlify Functions logs for details.', '');
       showError(e.message);
       ['stat-total','stat-web','stat-phone','stat-pages'].forEach(id => document.getElementById(id).textContent = '—');
     } finally {
