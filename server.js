@@ -16,7 +16,7 @@ function fetchViaZenRows(targetUrl, attempt = 0) {
       proxy_country: "au",
       js_render: "true",
       wait: "3000",
-      session_id: Math.floor(Math.random() * 9999999),
+      session_id: Math.floor(Math.random() * 9999),
     });
     const apiUrl = `https://api.zenrows.com/v1/?${params.toString()}`;
     const req = https.get(apiUrl, { timeout: 55000 }, res => {
@@ -130,11 +130,11 @@ const server = http.createServer(async (req, res) => {
     req.on("end", async () => {
       try {
         const body = JSON.parse(rawBody);
-        const url = `https://www.yellowpages.com.au/search/listings?clue=${encodeURIComponent(body.keyword)}&locationClue=${encodeURIComponent(body.location)}&pageNumber=1`;
+        const url = `https://www.yellowpages.com.au/${slug(body.location)}/${slug(body.keyword)}?pageNumber=1`;
         const { status, body: html } = await fetchViaZenRows(url);
-        res.writeHead(200, { "Content-Type": "text/plain" });
         const mid = Math.floor(html.length / 2);
-res.end(`STATUS: ${status}\nURL: ${url}\nLENGTH: ${html.length}\n\nSECTION 1 (0-30000):\n${html.substring(0, 30000)}\n\nSECTION 2 (mid):\n${html.substring(mid, mid + 30000)}`);
+        res.writeHead(200, { "Content-Type": "text/plain" });
+        res.end(`STATUS: ${status}\nURL: ${url}\nLENGTH: ${html.length}\n\nSECTION 1 (0-30000):\n${html.substring(0, 30000)}\n\nSECTION 2 (mid):\n${html.substring(mid, mid + 30000)}`);
       } catch(e) {
         res.writeHead(500, { "Content-Type": "application/json" });
         res.end(JSON.stringify({ error: e.message }));
@@ -168,7 +168,7 @@ res.end(`STATUS: ${status}\nURL: ${url}\nLENGTH: ${html.length}\n\nSECTION 1 (0-
     const allLeads = [], errors = [], debugInfo = [];
 
     for (let page = 1; page <= pages; page++) {
-      const url = `https://www.yellowpages.com.au/search/listings?clue=${encodeURIComponent(keyword)}&locationClue=${encodeURIComponent(location)}&pageNumber=${page}`;
+      const url = `https://www.yellowpages.com.au/${slug(location)}/${slug(keyword)}?pageNumber=${page}`;
       debugInfo.push(`Page ${page}: fetching → ${url}`);
       try {
         const { status, body: html } = await fetchViaZenRows(url);
